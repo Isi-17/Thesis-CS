@@ -1,7 +1,7 @@
 import csv
 
-ficheroEntrada = 'DatosReduced.txt'
-ficheroSalida = 'DatosReduced2.csv'
+ficheroEntrada = 'FileData.txt'
+ficheroSalida = 'FinalData.csv'
 
 # Diccionario para almacenar los datos
 data = {}
@@ -26,7 +26,7 @@ for line in lines:
 
     # Si el día no está en el diccionario, lo añado y le asigno una lista de 48 elementos: dia ++ 47 valores None correspindeintes a las medias horas. 
     if day not in data[ID]:
-        data[ID][day] = [day] + [None] * 47 # [fecha, consumo[0], consumo[1], ..., consumo[47]]
+        data[ID][day] = [day] + [None] * 47 # [dia, consumo[0], consumo[1], ..., consumo[47]]
 
     if 1 <= half_hour <= 48:
         data[ID][day][half_hour - 1] = float(consumption) * 1000  # kWH -> wH
@@ -65,9 +65,13 @@ filtered_data = {
 # Creación del fichero CSV
 with open(ficheroSalida, 'w', newline='') as file:
     writer = csv.writer(file)
-    # Escribo la cabecera
+    # Cabecera
     writer.writerow(['ID', 'date', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7', 'H8', 'H9', 'H10', 'H11', 'H12', 'H13', 'H14', 'H15', 'H16', 'H17', 'H18', 'H19', 'H20', 'H21', 'H22', 'H23'])
+    
     # Recorro el diccionario y escribo cada fila
-    for ID, dateANDconsumption in data_hourly.items():
+    for ID, dateANDconsumption in filtered_data.items(): # dateANDconsumption = [dia, consumo[0], consumo[1], ..., consumo[23]]
         for day, consumption_list in dateANDconsumption.items():
-            writer.writerow([ID, *consumption_list])
+            # Join para unir las primeras dos columnas con espacios y el resto con comas
+            row = [f"{ID} {consumption_list[0]} {consumption_list[1]}"] + consumption_list[2:]
+            writer.writerow(row)
+
