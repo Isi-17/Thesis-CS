@@ -77,7 +77,8 @@ with open(ficheroSalida, 'w', newline='') as file:
     for ID, dateANDconsumption in filtered_data.items(): # dateANDconsumption = [dia, consumo[0], consumo[1], ..., consumo[23]]
         for day, consumption_list in dateANDconsumption.items():
             # Join para unir las primeras dos columnas con espacios y el resto con comas
-            row = [f"{ID} {consumption_list[0]} {consumption_list[1]}"] + consumption_list[2:]
+            # row = [ID {consumption_list[0]} {consumption_list[1]}"] + consumption_list[2:]
+            row = [ID] + consumption_list
             writer.writerow(row)
 
 # Guardamos variable filtered_data
