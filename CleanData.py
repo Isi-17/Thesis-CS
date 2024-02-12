@@ -1,5 +1,7 @@
 import csv
+import pickle
 
+# Ficheros de entrada y salida
 ficheroEntrada = 'FileData.txt'
 ficheroSalida = 'FinalData.csv'
 
@@ -53,11 +55,14 @@ data_hourly = {
 # Aplico los filtros adicionales:
 # - El consumo total del día debe ser mayor de 100 Wh
 # - El consumo máximo en una hora no debe superar los 15000 Wh
+low_umbral = 100
+high_umbral = 15000
+
 filtered_data = {
     ID: {
         day: consumption_list
         for day, consumption_list in dateANDconsumption.items()
-        if sum(consumption_list[1:]) > 100 and max(consumption_list[1:]) <= 15000
+        if sum(consumption_list[1:]) > low_umbral and max(consumption_list[1:]) <= high_umbral
     }
     for ID, dateANDconsumption in data_hourly.items()
 }
@@ -74,4 +79,8 @@ with open(ficheroSalida, 'w', newline='') as file:
             # Join para unir las primeras dos columnas con espacios y el resto con comas
             row = [f"{ID} {consumption_list[0]} {consumption_list[1]}"] + consumption_list[2:]
             writer.writerow(row)
+
+# Guardamos variable filtered_data
+with open('filtered_data.pkl', 'wb') as file:
+    pickle.dump(filtered_data, file)
 
