@@ -26,31 +26,22 @@ for line in lines:
     if ID not in data:
         data[ID] = {}
 
-    # Si el día no está en el diccionario, lo añado y le asigno una lista de 48 elementos: dia ++ 47 valores None correspindeintes a las medias horas. 
+    # Si el día no está en el diccionario, lo añado y le asigno una lista de 24 elementos 
     if day not in data[ID]:
-        data[ID][day] = [day] + [None] * 47 # [dia, consumo[0], consumo[1], ..., consumo[47]]
+        data[ID][day] = [0.0] * 24 # [consumo[0], consumo[1], ..., consumo[23]]
 
-    if 1 <= half_hour <= 48:
-        data[ID][day][half_hour - 1] = float(consumption) * 1000  # kWH -> wH
+    if 0 <= hour <= 23: # hay un error en el fichero de entrada, hay medias horas superiores a 48
+        data[ID][day][hour] += float(consumption) * 1000  # kWH -> wH
         
-# Elimino las líneas con valores None
+# Elimino las líneas con valores 0 para alguna hora
 data_cleaned = {
     ID: {
         day: consumption_list
         for day, consumption_list in dateANDconsumption.items() 
-        if None not in consumption_list
+        if all(h_consum != 0 for h_consum in consumption_list)
     }
     for ID, dateANDconsumption in data.items()
 }
-
-# Ahora sumo los valores de las primeras y segundas medias horas para obtener los 24 valores por hora
-data_hourly = {
-    ID: {
-        day: [day] + [sum(data[ID][day][i:i + 2]) for i in range(0, 48, 2)]
-        for day in dateANDconsumption
-    }
-    for ID, dateANDconsumption in data_cleaned.items()
-} # [fecha, consumo[0], consumo[1], ..., consumo[23]]
 
 # Aplico los filtros adicionales:
 # - El consumo total del día debe ser mayor de 100 Wh
@@ -60,16 +51,16 @@ high_umbral = 15000
 
 # Identifico los ID que cumplen con la condición de consumo mínimo
 IDs_low_umbral = {
-    ID for ID, dateANDconsumption in data_hourly.items() 
-    if any(sum(consumption_list[1:]) < low_umbral for day, consumption_list in dateANDconsumption.items())
+    ID for ID, dateANDconsumption in data_cleaned.items() 
+    if any(sum(consumption_list) < low_umbral for day, consumption_list in dateANDconsumption.items())
 }
 
 print('Número de usuarios con algún consumo diario inferior a 100 Wh:', len(IDs_low_umbral)) # 164
 
 # Identifico los ID que cumplen con la condición de consumo máximo
 IDs_high_umbral = {
-    ID for ID, dateANDconsumption in data_hourly.items() 
-    if any(max(consumption_list[1:]) > high_umbral for day, consumption_list in dateANDconsumption.items())
+    ID for ID, dateANDconsumption in data_cleaned.items() 
+    if any(max(consumption_list) > high_umbral for day, consumption_list in dateANDconsumption.items())
     }
 
 print('Número de usuarios con consumo máximo superior a 15000 Wh:', len(IDs_high_umbral)) # 741
@@ -79,9 +70,9 @@ filtered_data = {
     ID: {
         day: consumption_list
         for day, consumption_list in dateANDconsumption.items()
-        if sum(consumption_list[1:]) > low_umbral # consumo total del día mayor de 100 Wh
+        if sum(consumption_list) > low_umbral # consumo total del día mayor de 100 Wh
     }
-    for ID, dateANDconsumption in data_hourly.items()
+    for ID, dateANDconsumption in data_cleaned.items()
     if ID not in IDs_high_umbral # no supera los 15000 Wh
 }
 
@@ -95,8 +86,7 @@ with open(ficheroSalida, 'w', newline='') as file:
     for ID, dateANDconsumption in filtered_data.items(): # dateANDconsumption = [dia, consumo[0], consumo[1], ..., consumo[23]]
         for day, consumption_list in dateANDconsumption.items():
             # Join para unir las primeras dos columnas con espacios y el resto con comas
-            # row = [ID {consumption_list[0]} {consumption_list[1]}"] + consumption_list[2:]
-            row = [ID] + consumption_list
+            row = [ID] + [day] + consumption_list
             writer.writerow(row)
 
 # Guardamos variable filtered_data
