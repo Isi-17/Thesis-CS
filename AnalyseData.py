@@ -10,7 +10,7 @@ print('Número de filas:', sum([len(dateANDconsumption) for dateANDconsumption i
 print('Número de usuarios con más de 365 días:', sum([len(dateANDconsumption) > 365 for dateANDconsumption in loaded_filtered_data.values()]))
 print('Número de usuarios con menos de 365 días:', sum([len(dateANDconsumption) < 365 for dateANDconsumption in loaded_filtered_data.values()]))
 
-# Número de usuarios únicos: 4991
-# Número de filas: 2473946
-# Número de usuarios con más de 365 días: 4529
-# Número de usuarios con menos de 365 días: 463
+# Número de usuarios únicos: 4250
+# Número de filas: 2168150
+# Número de usuarios con más de 365 días: 4004
+# Número de usuarios con menos de 365 días: 247

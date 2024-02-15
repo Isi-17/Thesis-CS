@@ -25,6 +25,7 @@ for index, row in df_data_consumptions.iterrows():
     # distancias = [distancia_centroide_1, distancia_centroide_2, ..., distancia_centroide_21]
  
     # Asignar el centroide con la distancia más baja
-    df_data_consumptions.at[index, 'Centroide'] = int(np.argmin(distances))
+    df_data_consumptions.at[index, 'Centroide'] = chr(65 + int(np.argmin(distances)))
+
 
 df_data_consumptions.to_csv('FinalData+Cluster.csv', index=False)

@@ -58,13 +58,31 @@ data_hourly = {
 low_umbral = 100
 high_umbral = 15000
 
+# Identifico los ID que cumplen con la condición de consumo mínimo
+IDs_low_umbral = {
+    ID for ID, dateANDconsumption in data_hourly.items() 
+    if any(sum(consumption_list[1:]) < low_umbral for day, consumption_list in dateANDconsumption.items())
+}
+
+print('Número de usuarios con algún consumo diario inferior a 100 Wh:', len(IDs_low_umbral)) # 164
+
+# Identifico los ID que cumplen con la condición de consumo máximo
+IDs_high_umbral = {
+    ID for ID, dateANDconsumption in data_hourly.items() 
+    if any(max(consumption_list[1:]) > high_umbral for day, consumption_list in dateANDconsumption.items())
+    }
+
+print('Número de usuarios con consumo máximo superior a 15000 Wh:', len(IDs_high_umbral)) # 741
+
+
 filtered_data = {
     ID: {
         day: consumption_list
         for day, consumption_list in dateANDconsumption.items()
-        if sum(consumption_list[1:]) > low_umbral and max(consumption_list[1:]) <= high_umbral
+        if sum(consumption_list[1:]) > low_umbral # consumo total del día mayor de 100 Wh
     }
     for ID, dateANDconsumption in data_hourly.items()
+    if ID not in IDs_high_umbral # no supera los 15000 Wh
 }
 
 # Creación del fichero CSV
