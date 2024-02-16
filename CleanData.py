@@ -33,6 +33,30 @@ for line in lines:
     if 0 <= hour <= 23: # hay un error en el fichero de entrada, hay medias horas superiores a 48
         data[ID][day][hour] += float(consumption) * 1000  # kWH -> wH
         
+# Aplico los filtros adicionales:
+# - El consumo total del día debe ser mayor de 100 Wh
+# - El consumo máximo en una hora no debe superar los 15000 Wh
+# - No puede haber valores 0 para alguna hora
+        
+low_umbral = 100
+high_umbral = 15000
+
+# Identifico los ID que cumplen con la condición de consumo mínimo algún día
+IDs_low_umbral = {
+    ID for ID, dateANDconsumption in data.items() 
+    if any(sum(consumption_list) < low_umbral for day, consumption_list in dateANDconsumption.items())
+}
+
+print('Número de usuarios con algún consumo diario inferior a 100 Wh:', len(IDs_low_umbral)) # 164
+
+# Identifico los ID que cumplen con la condición de consumo máximo en alguna hora
+IDs_high_umbral = {
+    ID for ID, dateANDconsumption in data.items() 
+    if any(max(consumption_list) > high_umbral for day, consumption_list in dateANDconsumption.items())
+    }
+
+print('Número de usuarios con consumo máximo superior a 15000 Wh:', len(IDs_high_umbral)) # 741
+
 # Elimino las líneas con valores 0 para alguna hora
 data_cleaned = {
     ID: {
@@ -42,28 +66,6 @@ data_cleaned = {
     }
     for ID, dateANDconsumption in data.items()
 }
-
-# Aplico los filtros adicionales:
-# - El consumo total del día debe ser mayor de 100 Wh
-# - El consumo máximo en una hora no debe superar los 15000 Wh
-low_umbral = 100
-high_umbral = 15000
-
-# Identifico los ID que cumplen con la condición de consumo mínimo
-IDs_low_umbral = {
-    ID for ID, dateANDconsumption in data_cleaned.items() 
-    if any(sum(consumption_list) < low_umbral for day, consumption_list in dateANDconsumption.items())
-}
-
-print('Número de usuarios con algún consumo diario inferior a 100 Wh:', len(IDs_low_umbral)) # 164
-
-# Identifico los ID que cumplen con la condición de consumo máximo
-IDs_high_umbral = {
-    ID for ID, dateANDconsumption in data_cleaned.items() 
-    if any(max(consumption_list) > high_umbral for day, consumption_list in dateANDconsumption.items())
-    }
-
-print('Número de usuarios con consumo máximo superior a 15000 Wh:', len(IDs_high_umbral)) # 741
 
 
 filtered_data = {
