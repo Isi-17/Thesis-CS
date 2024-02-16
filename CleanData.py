@@ -49,6 +49,19 @@ IDs_low_umbral = {
 
 print('Número de usuarios con algún consumo diario inferior a 100 Wh:', len(IDs_low_umbral)) # 220
 
+# Inicializa un contador para el número total de días que cumplen con la condición
+num_dias_cumplen_condicion = 0
+
+
+for ID, dateANDconsumption in data.items():
+    for day, consumption_list in dateANDconsumption.items():
+        if sum(consumption_list) < low_umbral:
+            num_dias_cumplen_condicion += 1
+
+# Imprime el número total de días que cumplen con la condición
+print('Número total de días con consumo diario inferior a 100 Wh:', num_dias_cumplen_condicion) # 15729
+
+
 # Identifico los ID que cumplen con la condición de consumo máximo en alguna hora
 IDs_high_umbral = {
     ID for ID, dateANDconsumption in data.items() 

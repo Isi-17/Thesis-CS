@@ -14,27 +14,27 @@ print(conteo_centroides_num)
 conteo_centroides_num.to_csv('ConteoCentroidesDesc.csv')
 
 # Centroide
-# F    595753
-# A    407568
-# L    204827
-# D    174041
-# Q    129181
-# K    121115
-# M     93836
-# S     69629
-# G     66462
-# T     65406
-# J     60771
-# R     59686
-# U     38936
-# I     23300
-# P     20851
-# H     20372
-# C      5378
-# N      4657
-# O      3448
-# E      2376
-# B       557
+# F    748779
+# A    524708
+# L    262283
+# D    224530
+# Q    168034
+# K    155179
+# M    122324
+# S     89427
+# G     85323
+# T     85133
+# J     78610
+# R     77462
+# U     49755
+# I     28735
+# P     27301
+# H     26110
+# C      6012
+# N      5467
+# O      3529
+# E      2818
+# B       583
 
 # -----------------------------------
 # Conteo centroides ordenado
@@ -47,27 +47,27 @@ print(conteo_centroides_ord)
 conteo_centroides_ord.to_csv('ConteoCentroidesOrd.csv')
 
 # Centroide
-# A    407568
-# B       557
-# C      5378
-# D    174041
-# E      2376
-# F    595753
-# G     66462
-# H     20372
-# I     23300
-# J     60771
-# K    121115
-# L    204827
-# M     93836
-# N      4657
-# O      3448
-# P     20851
-# Q    129181
-# R     59686
-# S     69629
-# T     65406
-# U     38936
+# A    524708
+# B       583
+# C      6012
+# D    224530
+# E      2818
+# F    748779
+# G     85323
+# H     26110
+# I     28735
+# J     78610
+# K    155179
+# L    262283
+# M    122324
+# N      5467
+# O      3529
+# P     27301
+# Q    168034
+# R     77462
+# S     89427
+# T     85133
+# U     49755
 
 # -----------------------------------
 # Conteo para cada usuario cuántas veces repite en distintos días cada uno de los centroides
