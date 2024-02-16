@@ -12,12 +12,12 @@ with open('filtered_data.pkl', 'rb') as file:
 # }
 
 
-print('Número de usuarios únicos:', len(loaded_filtered_data)-1)
+print('Número de usuarios únicos:', len(loaded_filtered_data))
 print('Número de filas:', sum([len(dateANDconsumption) for dateANDconsumption in loaded_filtered_data.values()]))
 print('Número de usuarios con más de 365 días:', sum([len(dateANDconsumption) > 365 for dateANDconsumption in loaded_filtered_data.values()]))
-print('Número de usuarios con menos de 365 días:', sum([len(dateANDconsumption) < 365 for dateANDconsumption in loaded_filtered_data.values()]))
+print('Número de usuarios con menos de 365 días:', sum([len(dateANDconsumption) <= 365 for dateANDconsumption in loaded_filtered_data.values()]))
 
-# Número de usuarios únicos: 5488
+# Número de usuarios únicos: 5489
 # Número de filas: 2772102
 # Número de usuarios con más de 365 días: 5118
-# Número de usuarios con menos de 365 días: 367
+# Número de usuarios con menos de 365 días: 371
