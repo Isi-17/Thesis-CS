@@ -1,31 +1,32 @@
 import pandas as pd
 import numpy as np
 
-# CSV con los consumos de energía por hora
+# Read the dataset with hourly energy consumptions
 df_data_consumptions = pd.read_csv('FinalData.csv', delimiter=',')
 
-# CSV con los centroides
+# Read the dataset with centroids
 df_centroids = pd.read_csv('ireland_centroids.csv', delimiter=';')
 
-# Añadimos columna de centroide asociado a cada fila de consumo
-df_data_consumptions['Centroide'] = np.nan
+# Add a column for the associated centroid to each consumption row
+df_data_consumptions['Centroid'] = np.nan
 
-# Cambiamos formato decimal de las columnas de consumo
+# Change decimal format of consumption columns
 df_centroids.iloc[:, 1:] = df_centroids.iloc[:, 1:].replace(',', '.', regex=True).astype(float)
 
+# Iterate through each row in the consumption dataset
 for index, row in df_data_consumptions.iterrows():
-    # row = [id, date, hour_1, hour_2, ..., hour_24, Centroid]
-    hour_consumption = row[2:-1] # [hour_1, hour_2, ..., hour_24]
+    # Extract hourly consumption values from the row
+    hour_consumption = row[2:-1]  # [hour_1, hour_2, ..., hour_24]
 
     consumption_array = hour_consumption.values.astype(float)
     
-    # Calcular la distancia con cada centroide
+    # Calculate the Euclidean distance to each centroid
     distances = np.linalg.norm(df_centroids.iloc[:, 1:].values - consumption_array, axis=1)
-    # 1: para saltar la primera columna con los nombres de las filas: '0' '1' ... '20'
-    # distancias = [distancia_centroide_1, distancia_centroide_2, ..., distancia_centroide_21]
+    # 1: Skip the first column with row names: '0' '1' ... '20'
+    # distances = [distance_centroid_1, distance_centroid_2, ..., distance_centroid_21]
  
-    # Asignar el centroide con la distancia más baja
-    df_data_consumptions.at[index, 'Centroide'] = chr(65 + int(np.argmin(distances)))
+    # Assign the centroid with the lowest distance
+    df_data_consumptions.at[index, 'Centroid'] = chr(65 + int(np.argmin(distances)))
 
-
+# Save the updated dataset with assigned centroids
 df_data_consumptions.to_csv('FinalData+Cluster.csv', index=False)
