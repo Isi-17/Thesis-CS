@@ -1,110 +1,104 @@
 import csv
 import pickle
 
-# Ficheros de entrada y salida
-ficheroEntrada = 'FileData.txt'
-ficheroSalida = 'FinalData.csv'
+# Input and output files
+input_file = 'FileData.txt'
+output_file = 'FinalData.csv'
 
-# Diccionario para almacenar los datos
+# Dictionary to store the data
 data = {}
 
-with open(ficheroEntrada, 'r') as file:
+# Read the input file and store the lines
+with open(input_file, 'r') as file:
     lines = file.readlines()
 
+# Process each line in the input file
 for line in lines:
-    # Divido la línea en tres partes: ID, date y consumo
+    # Split the line into three parts: ID, date, and consumption
     ID, date, consumption = line.split()
 
-    # Dia: primeras 3 cifras de la fecha
+    # Extract day and hour information from the date
     day = int(date[:3])
-
-    # Hora: últimas 2 cifras de la fecha. La hora viene dada en medias horas desde 01 hasta 48
-    half_hour = int(date[3:5])  # [1, 48]
-    hour = (half_hour - 1) // 2  # [0, 23]
+    half_hour = int(date[3:5])
+    hour = (half_hour - 1) // 2
     
-    # Si el ID no está en el diccionario, lo añado
+    # Initialize the data dictionary if necessary
     if ID not in data:
         data[ID] = {}
-
-    # Si el día no está en el diccionario, lo añado y le asigno una lista de 24 elementos 
+    
     if day not in data[ID]:
-        data[ID][day] = [0.0] * 24 # [consumo[0], consumo[1], ..., consumo[23]]
+        data[ID][day] = [0.0] * 24
 
-    if 0 <= hour <= 23: # hay un error en el fichero de entrada, hay medias horas superiores a 48
-        data[ID][day][hour] += float(consumption) * 1000  # kWH -> wH
-        
-# Aplico los filtros adicionales:
-# - El consumo total del día debe ser mayor de 100 Wh
-# - El consumo máximo en una hora no debe superar los 15000 Wh
-# - No puede haber valores 0 para alguna hora
-        
-low_umbral = 100
-high_umbral = 15000
+    # Update the consumption information
+    if 0 <= hour <= 23:
+        data[ID][day][hour] += float(consumption) * 1000  # Convert kWh to Wh
 
-# Identifico los ID que cumplen con la condición de consumo mínimo algún día
-IDs_low_umbral = {
-    ID for ID, dateANDconsumption in data.items() 
-    if any(sum(consumption_list) < low_umbral for day, consumption_list in dateANDconsumption.items())
+# Additional filters:
+# - Total daily consumption must be greater than 100 Wh
+# - Maximum consumption in an hour must not exceed 15000 Wh
+# - No zero values for any hour
+
+low_threshold = 100
+high_threshold = 15000
+
+# Identify IDs with daily consumption below the minimum threshold
+IDs_below_threshold = {
+    ID for ID, date_and_consumption in data.items()
+    if any(sum(consumption_list) < low_threshold for day, consumption_list in date_and_consumption.items())
 }
 
-print('Número de usuarios con algún consumo diario inferior a 100 Wh:', len(IDs_low_umbral)) # 220
+print('Number of users with daily consumption below 100 Wh:', len(IDs_below_threshold)) # 220
 
-# Inicializa un contador para el número total de días que cumplen con la condición
-num_dias_cumplen_condicion = 0
+# Count the total number of days meeting the condition
+total_days_below_threshold = sum(
+    sum(sum(consumption_list) < low_threshold for day, consumption_list in date_and_consumption.items())
+    for ID, date_and_consumption in data.items()
+)
 
+print('Total number of days with daily consumption below 100 Wh:', total_days_below_threshold) # 15729
 
-for ID, dateANDconsumption in data.items():
-    for day, consumption_list in dateANDconsumption.items():
-        if sum(consumption_list) < low_umbral:
-            num_dias_cumplen_condicion += 1
+# Identify IDs with maximum consumption exceeding 15000 Wh in any hour
+IDs_above_threshold = {
+    ID for ID, date_and_consumption in data.items()
+    if any(max(consumption_list) > high_threshold for day, consumption_list in date_and_consumption.items())
+}
 
-# Imprime el número total de días que cumplen con la condición
-print('Número total de días con consumo diario inferior a 100 Wh:', num_dias_cumplen_condicion) # 15729
+print('Number of users with maximum consumption above 15000 Wh:', len(IDs_above_threshold)) # 946
 
-
-# Identifico los ID que cumplen con la condición de consumo máximo en alguna hora
-IDs_high_umbral = {
-    ID for ID, dateANDconsumption in data.items() 
-    if any(max(consumption_list) > high_umbral for day, consumption_list in dateANDconsumption.items())
-    }
-
-print('Número de usuarios con consumo máximo superior a 15000 Wh:', len(IDs_high_umbral)) # 946
-
-# Elimino las líneas con valores 0 para alguna hora
-data_cleaned = {
+# Remove lines with zero values for any hour
+cleaned_data = {
     ID: {
         day: consumption_list
-        for day, consumption_list in dateANDconsumption.items() 
-        if all(h_consum != 0 for h_consum in consumption_list)
+        for day, consumption_list in date_and_consumption.items()
+        if all(hour_consumption != 0 for hour_consumption in consumption_list)
     }
-    for ID, dateANDconsumption in data.items()
+    for ID, date_and_consumption in data.items()
 }
 
-
+# Filter the data based on additional conditions
 filtered_data = {
     ID: {
         day: consumption_list
-        for day, consumption_list in dateANDconsumption.items()
-        if sum(consumption_list) > low_umbral # consumo total del día mayor de 100 Wh
+        for day, consumption_list in date_and_consumption.items()
+        if sum(consumption_list) > low_threshold
     }
-    for ID, dateANDconsumption in data_cleaned.items()
-    if ID not in IDs_high_umbral # no supera los 15000 Wh
+    for ID, date_and_consumption in cleaned_data.items()
+    if ID not in IDs_above_threshold
 }
 
-# Creación del fichero CSV
-with open(ficheroSalida, 'w', newline='') as file:
+# Create the CSV file
+with open(output_file, 'w', newline='') as file:
     writer = csv.writer(file)
-    # Cabecera
+    # Header
     writer.writerow(['ID', 'date', 'H0', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7', 'H8', 'H9', 'H10', 'H11', 'H12', 'H13', 'H14', 'H15', 'H16', 'H17', 'H18', 'H19', 'H20', 'H21', 'H22', 'H23'])
     
-    # Recorro el diccionario y escribo cada fila
-    for ID, dateANDconsumption in filtered_data.items(): # dateANDconsumption = [dia, consumo[0], consumo[1], ..., consumo[23]]
-        for day, consumption_list in dateANDconsumption.items():
-            # Join para unir las primeras dos columnas con espacios y el resto con comas
-            row = [ID] + [day] + consumption_list
+    # Write each row to the CSV file
+    for ID, date_and_consumption in filtered_data.items():
+        for day, consumption_list in date_and_consumption.items():
+            # Join to combine the first two columns with spaces and the rest with commas
+            row = [ID, day] + consumption_list
             writer.writerow(row)
-
-# Guardamos variable filtered_data
+            
+# Save variable filtered_data
 with open('filtered_data.pkl', 'wb') as file:
     pickle.dump(filtered_data, file)
-
