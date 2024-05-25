@@ -6,6 +6,9 @@ library(caret)
 # Read data
 path <- "Files/sequence_patterns_2_6-10.csv"
 data <- read.csv(path)
+# These users are removed because their last state has no transition probability as it has not appeared before in the sequence.
+data <- data[-279, ]
+data <- data[-488, ]
 set.seed(123)
 
 # Define the alphabet and state labels
@@ -72,7 +75,7 @@ predicted_values <- character()
 # Loop through each row in the dataset
 for (i in 1:nrow(data)) {
   # Extract the row
-  row <- data[i, 2:(ncol(data)-2)]
+  row <- data[i, 2:(ncol(data)-1)]
   
   # Train a model for the current row
   model <- train_model_for_row(row)
@@ -104,11 +107,15 @@ print(paste("Accuracy of the model for each row:", accuracy))
 
 # Convert actual_values and predicted_values to factors
 actual_values <- as.character(actual_values)
-actual_values <- as.factor(actual_values)
-predicted_values <- as.factor(predicted_values)
+
+all_levels <- union(levels(factor(actual_values)), levels(factor(predicted_values)))
+
+actual_values <- factor(actual_values, levels = all_levels)
+predicted_values <- factor(predicted_values, levels = all_levels)
 
 # Compute confusion matrix
 conf_matrix <- confusionMatrix(data = predicted_values, reference = actual_values)
 
 # Print confusion matrix
 print(conf_matrix)
+

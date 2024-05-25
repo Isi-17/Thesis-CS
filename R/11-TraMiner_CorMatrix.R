@@ -6,6 +6,9 @@ library(caret)
 
 path <- "Files/sequence_patterns_2_6-10.csv"
 data <- read.csv(path)
+# These users are removed because their last state has no transition probability as it has not appeared before in the sequence.
+data <- data[-279, ]
+data <- data[-488, ]
 cor_matrix <- read.csv("Files/correlation_matrix.csv", colClasses=c("NULL", rep("numeric", 21)))
 
 set.seed(123)
@@ -104,16 +107,20 @@ for (i in 1:nrow(data)) {
 accuracy <- num_correct_predictions / total_predictions
 
 # Print the accuracy
-print(paste("Accuracy of the model for each row with correction:", accuracy)) # 0.7058823 
+print(paste("Accuracy of the model for each row:", accuracy))
 
 # Convert actual_values and predicted_values to factors
 actual_values <- as.character(actual_values)
-actual_values <- as.factor(actual_values)
-predicted_values <- as.factor(predicted_values)
+
+all_levels <- union(levels(factor(actual_values)), levels(factor(predicted_values)))
+
+actual_values <- factor(actual_values, levels = all_levels)
+predicted_values <- factor(predicted_values, levels = all_levels)
 
 # Compute confusion matrix
 conf_matrix <- confusionMatrix(data = predicted_values, reference = actual_values)
 
 # Print confusion matrix
 print(conf_matrix)
+
 
