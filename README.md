@@ -1,4 +1,4 @@
-# Bachelor's Thesis in Computer Science: Temporal Analysis and Modeling of Energy Consumption Patterns in Sustainable Housing
+# Bachelor's Thesis in Computer Science: Temporal Analysis and Modeling of Energy Consumption Patterns in Sustainable Homes
 
 ## Description
 This repository hosts my Bachelor's thesis project focusing on the temporal analysis and modeling of energy consumption patterns within sustainable housing. The study employs data mining techniques to develop predictive models, aiming to discern fluctuations, trends, peak/off-peak demand times, environmental influences, and usage habits in household electricity consumption. Through a theoretical-practical approach, various data mining methods are assessed to extract meaningful patterns and evaluate results' quality.
